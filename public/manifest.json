@@ -1,0 +1,22 @@
+{
+  "name": "EduLearn - Educational Platform",
+  "short_name": "EduLearn",
+  "description": "A comprehensive educational platform for students and teachers",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "lang": "en-US",
+  "scope": "/",
+  "prefer_related_applications": false
+}

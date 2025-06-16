@@ -1,0 +1,88 @@
+@import './styles/design-tokens.css';
+@import './styles/components.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Skip Link Styles */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--color-primary-600);
+  color: var(--color-neutral-0);
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  z-index: 1000;
+  transition: top 0.2s ease-in-out;
+}
+
+.skip-link:focus {
+  top: 6px;
+  outline: 2px solid var(--color-accent-500);
+  outline-offset: 2px;
+}
+
+/* Focus Management */
+#main-content:focus {
+  outline: none;
+}
+
+/* Enhanced Focus Indicators */
+*:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* High contrast theme focus indicators */
+.theme-high-contrast *:focus-visible {
+  outline: 3px solid var(--color-accent-500);
+  outline-offset: 3px;
+}
+
+/* Toast animations */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+.animate-slide-out-right {
+  animation: slide-out-right 0.3s ease-in;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
+  
+  .animate-slide-in-right,
+  .animate-slide-out-right {
+    animation: none;
+  }
+}
