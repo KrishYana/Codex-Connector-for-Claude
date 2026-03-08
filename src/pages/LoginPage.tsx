@@ -35,7 +35,7 @@ export const LoginPage: React.FC = () => {
           <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-radius-2xl mx-auto mb-space-4 flex items-center justify-center">
             <BookOpen className="w-8 h-8 text-neutral-0" />
           </div>
-          <h1 className="heading-1 mb-space-2">EduLearn</h1>
+          <h1 className="heading-1 mb-space-2">Codex Connector</h1>
           <p className="body-text">Choose your role to continue</p>
         </div>
 
