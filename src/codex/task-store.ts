@@ -1,4 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { unlink } from "node:fs/promises";
 import type { TaskRecord, TaskStatus, CodexConfig, SandboxMode } from "../types.js";
 import { spawnCodexTask } from "./cli-wrapper.js";
 
@@ -16,10 +19,20 @@ export class TaskStore {
     model?: string,
     sandbox?: SandboxMode,
   ): TaskRecord {
+    // Enforce concurrency limit
+    const runningCount = this.list("running").length;
+    if (runningCount >= this.config.maxConcurrentTasks) {
+      throw new Error(
+        `Concurrency limit reached (${this.config.maxConcurrentTasks} tasks running). ` +
+        `Cancel or wait for a task to finish before submitting more.`,
+      );
+    }
+
     const id = uuidv4();
     const dir = workingDir ?? this.config.defaultWorkingDir;
     const mdl = model ?? this.config.defaultModel;
     const sb = sandbox ?? this.config.defaultSandbox;
+    const resultFilePath = join(tmpdir(), `codex-result-${id}.md`);
 
     const { process: child, pid } = spawnCodexTask(
       this.config,
@@ -27,6 +40,7 @@ export class TaskStore {
       dir,
       mdl,
       sb,
+      resultFilePath,
     );
 
     const record: TaskRecord = {
@@ -42,6 +56,7 @@ export class TaskStore {
       workingDirectory: dir,
       model: mdl,
       sandbox: sb,
+      resultFilePath,
     };
 
     child.stdout?.on("data", (data: Buffer) => {
@@ -55,24 +70,32 @@ export class TaskStore {
     child.on("close", (code) => {
       record.endTime = Date.now();
       record.childProcess = null;
-      if (record.status === "cancelled") return;
+      if (record.status === "cancelled" || record.status === "timed_out") return;
       record.status = code === 0 ? "completed" : "failed";
     });
 
     child.on("error", (err) => {
       record.endTime = Date.now();
       record.childProcess = null;
-      if (record.status === "cancelled") return;
+      if (record.status === "cancelled" || record.status === "timed_out") return;
       record.status = "failed";
       record.errorOutput += `\nProcess error: ${err.message}`;
     });
 
-    // Auto-timeout
+    // Auto-timeout with distinct timed_out status
     setTimeout(() => {
       if (record.status === "running") {
-        this.cancel(id);
-        record.status = "failed";
+        record.status = "timed_out";
+        record.endTime = Date.now();
         record.errorOutput += `\nTask timed out after ${this.config.taskTimeoutMs / 1000}s`;
+        if (record.childProcess) {
+          record.childProcess.kill("SIGTERM");
+          const cp = record.childProcess;
+          setTimeout(() => {
+            try { cp.kill("SIGKILL"); } catch { /* already exited */ }
+          }, 5000);
+          record.childProcess = null;
+        }
       }
     }, this.config.taskTimeoutMs);
 
@@ -99,10 +122,9 @@ export class TaskStore {
     task.endTime = Date.now();
     if (task.childProcess) {
       task.childProcess.kill("SIGTERM");
+      const cp = task.childProcess;
       setTimeout(() => {
-        if (task.childProcess) {
-          task.childProcess.kill("SIGKILL");
-        }
+        try { cp.kill("SIGKILL"); } catch { /* already exited */ }
       }, 5000);
       task.childProcess = null;
     }
@@ -116,6 +138,9 @@ export class TaskStore {
         task.endTime &&
         now - task.endTime > this.config.maxTaskAge
       ) {
+        if (task.resultFilePath) {
+          unlink(task.resultFilePath).catch(() => {});
+        }
         this.tasks.delete(id);
       }
     }

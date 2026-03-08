@@ -28,5 +28,6 @@ export function loadConfig(): CodexConfig {
     defaultWorkingDir: process.env.CODEX_WORKING_DIR ?? process.cwd(),
     taskTimeoutMs: parseInt(process.env.CODEX_TASK_TIMEOUT_MS ?? "600000", 10),
     maxTaskAge: parseInt(process.env.CODEX_MAX_TASK_AGE_MS ?? "3600000", 10),
+    maxConcurrentTasks: parseInt(process.env.CODEX_MAX_TASKS ?? "5", 10),
   };
 }

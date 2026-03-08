@@ -70,6 +70,7 @@ All configuration is via environment variables set in the Claude Desktop MCP con
 | `CODEX_WORKING_DIR` | Current directory | Default working directory for Codex tasks |
 | `CODEX_TASK_TIMEOUT_MS` | `600000` (10 min) | Max time for a single task |
 | `CODEX_MAX_TASK_AGE_MS` | `3600000` (1 hour) | How long to keep completed tasks in memory |
+| `CODEX_MAX_TASKS` | `5` | Maximum number of concurrent running tasks |
 
 ## Available Tools
 

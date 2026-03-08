@@ -1,7 +1,8 @@
+import { readFile } from "node:fs/promises";
 import type { TaskStore } from "../codex/task-store.js";
 import type { GetResultInput } from "../types.js";
 
-export function handleGetResult(store: TaskStore, input: GetResultInput) {
+export async function handleGetResult(store: TaskStore, input: GetResultInput) {
   const task = store.get(input.task_id);
 
   if (!task) {
@@ -36,6 +37,16 @@ export function handleGetResult(store: TaskStore, input: GetResultInput) {
 
   const elapsed = ((task.endTime ?? Date.now()) - task.startTime) / 1000;
 
+  // Prefer the clean result from --output-last-message file over raw JSONL stdout
+  let output = task.output;
+  if (task.resultFilePath) {
+    try {
+      output = await readFile(task.resultFilePath, "utf-8");
+    } catch {
+      // File may have been cleaned up or never written; fall back to raw output
+    }
+  }
+
   return {
     content: [
       {
@@ -44,7 +55,7 @@ export function handleGetResult(store: TaskStore, input: GetResultInput) {
           {
             taskId: task.id,
             status: task.status,
-            output: task.output,
+            output,
             error: task.errorOutput || undefined,
             elapsed_seconds: Math.round(elapsed),
           },

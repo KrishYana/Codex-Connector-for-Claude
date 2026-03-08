@@ -46,7 +46,7 @@ export async function handleAskCodex(config: CodexConfig, input: AskCodexInput) 
           type: "text" as const,
           text: JSON.stringify(
             {
-              response: result.stdout,
+              response: result.resultMessage ?? result.stdout,
               elapsed_seconds: Math.round(elapsed),
             },
             null,
