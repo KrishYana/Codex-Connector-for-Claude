@@ -68,7 +68,7 @@ server.tool(
   "List all Codex tasks and their statuses. Useful for tracking multiple parallel tasks.",
   {
     status_filter: z
-      .enum(["all", "running", "completed", "failed"])
+      .enum(["all", "running", "completed", "failed", "cancelled", "timed_out"])
       .optional()
       .describe("Filter tasks by status (defaults to all)"),
   },

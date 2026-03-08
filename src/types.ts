@@ -5,7 +5,8 @@ export type TaskStatus =
   | "running"
   | "completed"
   | "failed"
-  | "cancelled";
+  | "cancelled"
+  | "timed_out";
 
 export type SandboxMode = "read-only" | "workspace-write" | "danger-full-access";
 
@@ -22,6 +23,7 @@ export interface TaskRecord {
   workingDirectory: string;
   model: string;
   sandbox: SandboxMode;
+  resultFilePath: string | null;
 }
 
 export interface CodexConfig {
@@ -31,6 +33,7 @@ export interface CodexConfig {
   defaultWorkingDir: string;
   taskTimeoutMs: number;
   maxTaskAge: number;
+  maxConcurrentTasks: number;
 }
 
 export interface SubmitTaskInput {
@@ -49,7 +52,7 @@ export interface GetResultInput {
 }
 
 export interface ListTasksInput {
-  status_filter?: "all" | "running" | "completed" | "failed";
+  status_filter?: "all" | "running" | "completed" | "failed" | "cancelled" | "timed_out";
 }
 
 export interface CancelTaskInput {

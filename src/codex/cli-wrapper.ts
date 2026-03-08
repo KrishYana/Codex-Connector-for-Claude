@@ -1,4 +1,8 @@
 import { spawn, type ChildProcess } from "node:child_process";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { randomUUID } from "node:crypto";
+import { readFile, unlink } from "node:fs/promises";
 import type { CodexConfig, SandboxMode } from "../types.js";
 
 export interface SpawnResult {
@@ -10,6 +14,7 @@ export interface SyncResult {
   stdout: string;
   stderr: string;
   exitCode: number | null;
+  resultMessage: string | null;
 }
 
 export function spawnCodexTask(
@@ -18,9 +23,13 @@ export function spawnCodexTask(
   workingDir: string,
   model: string,
   sandbox: SandboxMode,
+  resultFilePath: string,
 ): SpawnResult {
   const args = [
-    "--quiet",
+    "exec",
+    "--json",
+    "--ephemeral",
+    "--output-last-message", resultFilePath,
     "-a", "never",
     "-s", sandbox,
     "--model", model,
@@ -45,8 +54,12 @@ export async function runCodexSync(
   workingDir: string,
   timeoutMs: number,
 ): Promise<SyncResult> {
+  const resultFile = join(tmpdir(), `codex-ask-${randomUUID()}.md`);
   const args = [
-    "--quiet",
+    "exec",
+    "--json",
+    "--ephemeral",
+    "--output-last-message", resultFile,
     "-a", "never",
     "-s", "read-only",
     "--model", config.defaultModel,
@@ -78,17 +91,29 @@ export async function runCodexSync(
       stderr += data.toString();
     });
 
-    child.on("close", (code) => {
+    child.on("close", async (code) => {
       clearTimeout(timer);
+
       if (timedOut) {
+        await unlink(resultFile).catch(() => {});
         reject(new Error(`Codex task timed out after ${timeoutMs / 1000}s`));
         return;
       }
-      resolve({ stdout, stderr, exitCode: code });
+
+      let resultMessage: string | null = null;
+      try {
+        resultMessage = await readFile(resultFile, "utf-8");
+      } catch {
+        // File may not exist if Codex crashed before writing
+      }
+      await unlink(resultFile).catch(() => {});
+
+      resolve({ stdout, stderr, exitCode: code, resultMessage });
     });
 
-    child.on("error", (err) => {
+    child.on("error", async (err) => {
       clearTimeout(timer);
+      await unlink(resultFile).catch(() => {});
       reject(err);
     });
   });
