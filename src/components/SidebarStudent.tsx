@@ -26,7 +26,7 @@ export const SidebarStudent: React.FC = () => {
               <BookOpen className="w-5 h-5 text-primary-600" />
             </div>
             {!isCollapsed && (
-              <h2 className="text-scale-xl font-weight-bold">EduLearn</h2>
+              <h2 className="text-scale-xl font-weight-bold">Codex Connector</h2>
             )}
           </div>
           

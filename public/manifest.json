@@ -1,7 +1,7 @@
 {
-  "name": "EduLearn - Educational Platform",
-  "short_name": "EduLearn",
-  "description": "A comprehensive educational platform for students and teachers",
+  "name": "Codex Connector for Claude",
+  "short_name": "Codex Connector",
+  "description": "Codex Connector for Claude",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

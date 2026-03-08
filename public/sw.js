@@ -1,6 +1,6 @@
 // Service Worker for offline caching
-const CACHE_NAME = 'edulearn-v1';
-const STATIC_CACHE_NAME = 'edulearn-static-v1';
+const CACHE_NAME = 'codex-connector-v1';
+const STATIC_CACHE_NAME = 'codex-connector-static-v1';
 const MAX_CACHE_SIZE = 100 * 1024 * 1024; // 100 MB
 const CACHE_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -24,7 +24,7 @@ const CACHEABLE_APIS = [
 const CACHEABLE_EXTENSIONS = ['.pdf', '.mp4', '.mp3', '.jpg', '.jpeg', '.png', '.webp'];
 
 // IndexedDB setup
-const DB_NAME = 'EduLearnCache';
+const DB_NAME = 'CodexConnectorCache';
 const DB_VERSION = 1;
 const STORES = {
   modules: 'modules',
